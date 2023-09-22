@@ -1,0 +1,4 @@
+Flask
+Flask-OIDC
+Flask_cors
+pymongo>3
