@@ -1,5 +1,12 @@
-Flask
-Flask-OIDC
-Flask_cors
-pymongo>3
-python-dotenv
+# Flask
+# Flask-OIDC
+# Flask_cors
+# pymongo>3
+# python-dotenv
+# Flask-Pydantic
+# pydantic
+
+fastapi
+uvicorn
+motor
+Pydantic
