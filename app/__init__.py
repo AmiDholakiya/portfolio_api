@@ -40,14 +40,17 @@
 #     return app
 
 from fastapi import FastAPI
+import boto3
 import os
 
 from dotenv import load_dotenv
-from motor.motor_asyncio import AsyncIOMotorClient
+# from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo.mongo_client import MongoClient
 
 app = FastAPI()
 load_dotenv()
-cluster  = AsyncIOMotorClient(os.getenv('MONGODB_URI'))
+# cluster  = AsyncIOMotorClient(os.getenv('MONGODB_URI'))
+cluster=MongoClient(os.getenv('MONGODB_URI'))
 try:
     cluster .admin.command('ping')
     print("Pinged your deployment. You successfully connected to MongoDB!")
@@ -55,6 +58,12 @@ except Exception as e:
     print(e)
 global db
 db = cluster[os.getenv('MONGO_DB')]
+s3 = boto3.client(
+    "s3",
+    aws_access_key_id=os.environ["AWS_ACCESS"],
+    aws_secret_access_key=os.environ['AWS_SECRET'],
+    region_name=os.environ["AWS_REGION"]
+)
 
 from app.socialMedia import router as SocialMediaRouter
 app.include_router(SocialMediaRouter, tags=["Social Media"],prefix="/social-media")

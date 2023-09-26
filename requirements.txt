@@ -8,5 +8,8 @@
 
 fastapi
 uvicorn
-motor
+pymongo>3
+#motor
 Pydantic
+boto3
+python-multipart
