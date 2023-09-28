@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 
 def create_app():
-    global app, db, s3
+    global app, db, s3, password_context
     app = FastAPI()
     load_dotenv()
     cluster=MongoClient(os.getenv('MONGODB_URI'))
@@ -25,6 +25,12 @@ def create_app():
 
     from app.socialMedia.routes import router as SocialMediaRouter
     app.include_router(SocialMediaRouter, tags=["Social Media"],prefix="/social-media")
+
+    from app.user.routes import router as UserRouter
+    app.include_router(UserRouter, tags=["User"], prefix="/user")
+
+    from app.authentication.routes import router as LoginRouter
+    app.include_router(LoginRouter, tags=["Login"], prefix="/login")
 
     @app.get("/test",tags=["Root"])
     async def read_root():

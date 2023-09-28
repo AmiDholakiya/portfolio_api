@@ -3,11 +3,21 @@ from typing import Optional
 from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
 import datetime
+from app.helper import PyObjectId
 
+class SocialMediaDBModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId,alias="_id")
+    name: str
+    logo_file: str
+    prifile_link: str
+    user_id:str
+    created_at: str
 class SocialMediaCreateModel(BaseModel):
     # id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     name: str
-    logo_file: Optional[str] = Field(default="")
+    logo_file: str
+    prifile_link: str
+    user_id: str
     created_at: datetime.datetime = datetime.datetime.now()
     def to_json(self):
         return jsonable_encoder(self,exclude_none=True)
@@ -31,6 +41,7 @@ class SocialMediaCreateModel(BaseModel):
 class SocialMediaUpdateModel(BaseModel):
     # id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     name: Optional[str] = Field(default="")
+    prifile_link: Optional[str] = Field(default="")
     logo_file: Optional[str] = Field(default="")
     def to_json(self):
         return jsonable_encoder(self,exclude_none=True)

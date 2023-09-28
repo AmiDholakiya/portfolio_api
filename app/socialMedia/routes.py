@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, Depends, Body, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from typing import List
@@ -20,7 +20,7 @@ async def index(pageSize: int = 10, pageNumebr: int = 1):
         skips = pageSize * (pageNumebr - 1)
         resultList = list()
         total_document = socialMedial_col.count_documents({})
-        get_all = socialMedial_col.find().skip(skips).limit(pageSize).sort("created_at",1)
+        get_all = socialMedial_col.find({},{"user_id":0,"created_at":0}).skip(skips).limit(pageSize).sort("created_at",1)
         for item in get_all:
             if "logo_file" in item:
                 item['logo_file'] = get_S3_signed_URL(item['logo_file'])
@@ -33,7 +33,7 @@ async def index(pageSize: int = 10, pageNumebr: int = 1):
 @router.get("/{id}")
 async def get_socialMedia_ById(id:str):
     try:
-        result = socialMedial_col.find_one({"_id": ObjectId(id)})
+        result = socialMedial_col.find({"_id": ObjectId(id)},{"user_id":0,"created_at":0})
         if result is not None:
             if "logo_file" in result:
                 result['logo_file'] = get_S3_signed_URL(result['logo_file']) 

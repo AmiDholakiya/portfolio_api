@@ -13,3 +13,5 @@ pymongo>3
 Pydantic
 boto3
 python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
