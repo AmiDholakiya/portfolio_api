@@ -1,10 +1,7 @@
-from fastapi import APIRouter, UploadFile, File, Depends, Body, HTTPException, status, Response
+import datetime
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-from typing import List
 from pymongo.collection import Collection
-import json
 from bson import ObjectId
 
 from app import db
@@ -17,14 +14,16 @@ router = APIRouter()
 
 @router.post("/",response_model=TokenSchema)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    # existing_token = authentication_col.find_one({"username":form_data.username})
-    # if existing_token is not None:
-    #     isValid = await get_token_data(existing_token["access_token"])
-    #     if isValid:
-    #         return {
-    #             "access_token": "access_token" ,
-    #             "refresh_token": "refresh_token"
-    #         } 
+    existing_token = authentication_col.find_one({"username":form_data.username})
+    if existing_token is not None:
+        isValid = await get_token_data(existing_token["access_token"])
+        if isValid:
+            return {
+                "access_token": existing_token["access_token"] ,
+                "refresh_token": existing_token["refresh_token"]
+            }
+        else:
+            authentication_col.delete_one({"_id":ObjectId(existing_token["_id"])}) 
     user = user_col.find_one({"email":form_data.username},{"created_at":0})
     if user is None:
         raise HTTPException(
@@ -40,10 +39,18 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         )
     access_token = create_access_token(user['email'])
     refresh_token = create_refresh_token(user['email'])
-    authentication = Authentication(**{"username":str(form_data.username),"client_id":str(form_data.client_id or ""),"access_token":access_token,"refresh_token":refresh_token})
-    authentication_col.insert_one(authentication.__dict__)
-    return {
-        "access_token": access_token ,
-        "refresh_token": refresh_token
-    }
+    try:
+        authentication = Authentication(**{"username":str(form_data.username),"client_id":str(form_data.client_id or ""),"access_token":access_token,"refresh_token":refresh_token,"created_at":datetime.datetime.now()})
+        authentication_col.insert_one(authentication.__dict__)
+        return {
+            "access_token": access_token ,
+            "refresh_token": refresh_token
+        }
+    except Exception as e:
+        print("Error while Login ----> ",e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error"
+        )
+    
     

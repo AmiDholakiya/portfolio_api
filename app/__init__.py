@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 import boto3
 import os
+from jwt.api_jwt import PyJWT
 
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 
 def create_app():
-    global app, db, s3, password_context
+    global app, db, s3, jwt_obj
     app = FastAPI()
     load_dotenv()
     cluster=MongoClient(os.getenv('MONGODB_URI'))
@@ -22,6 +23,7 @@ def create_app():
         aws_secret_access_key=os.environ['AWS_SECRET'],
         region_name=os.environ["AWS_REGION"]
     )
+    jwt_obj = PyJWT()
 
     from app.socialMedia.routes import router as SocialMediaRouter
     app.include_router(SocialMediaRouter, tags=["Social Media"],prefix="/social-media")
