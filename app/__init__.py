@@ -25,14 +25,21 @@ def create_app():
     )
     jwt_obj = PyJWT()
 
-    from app.socialMedia.routes import router as SocialMediaRouter
-    app.include_router(SocialMediaRouter, tags=["Social Media"],prefix="/social-media")
+    from app.authentication.routes import router as LoginRouter
+    app.include_router(LoginRouter, tags=["Login"], prefix="/login")
 
     from app.user.routes import router as UserRouter
     app.include_router(UserRouter, tags=["User"], prefix="/user")
 
-    from app.authentication.routes import router as LoginRouter
-    app.include_router(LoginRouter, tags=["Login"], prefix="/login")
+    from app.socialMedia.routes import router as SocialMediaRouter
+    app.include_router(SocialMediaRouter, tags=["Social Media"],prefix="/social-media")
+
+    from app.projects.routes import router as ProjectsRouter
+    app.include_router(ProjectsRouter, tags=["Projects"],prefix="/project")
+
+    
+
+    
 
     @app.get("/test",tags=["Root"])
     async def read_root():
