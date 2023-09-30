@@ -10,14 +10,14 @@ class SocialMediaDBModel(BaseModel):
     name: str
     logo_file: str
     prifile_link: str
-    user_id:str
+    user_id:str 
     created_at: str
 class SocialMediaCreateModel(BaseModel):
     # id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     name: str
-    logo_file: str
-    prifile_link: str
-    user_id: str
+    logo_file: str | None = None
+    prifile_link: str 
+    user_id: str | None = None
     created_at: datetime.datetime = datetime.datetime.now()
     def to_json(self):
         return jsonable_encoder(self,exclude_none=True)

@@ -37,8 +37,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect email or password"
         )
-    access_token = create_access_token({"email":user['email']})
-    refresh_token = create_refresh_token({"email":user['email']})
+    access_token = create_access_token({"email":user['email'],"_id":str(user["_id"])})
+    refresh_token = create_refresh_token({"email":user['email'],"_id":str(user["_id"])})
     try:
         authentication = Authentication(**{"username":str(form_data.username),"client_id":str(form_data.client_id or ""),"access_token":access_token,"refresh_token":refresh_token,"created_at":datetime.datetime.now()})
         authentication_col.insert_one(authentication.__dict__)
