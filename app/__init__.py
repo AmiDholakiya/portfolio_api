@@ -37,7 +37,8 @@ def create_app():
     from app.projects.routes import router as ProjectsRouter
     app.include_router(ProjectsRouter, tags=["Projects"],prefix="/project")
 
-    
+    from app.education.routes import router as EducationRouter
+    app.include_router(EducationRouter, tags=["Education"], prefix="/education")
 
     
 
