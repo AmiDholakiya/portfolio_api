@@ -40,7 +40,8 @@ def create_app():
     from app.education.routes import router as EducationRouter
     app.include_router(EducationRouter, tags=["Education"], prefix="/education")
 
-    
+    from app.certificate.routes import router as CertificateRouter
+    app.include_router(CertificateRouter, tags=["Certificate"], prefix="/certificate")
 
     @app.get("/test",tags=["Root"])
     async def read_root():

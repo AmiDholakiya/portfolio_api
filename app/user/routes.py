@@ -9,7 +9,7 @@ from app import db
 from app.user.models import UserCreateModel, UserUpdateModel
 from app.helper import get_S3_signed_URL, file_upload_s3, get_filename, delete_file_s3, get_hashed_password, get_token_data, validateToken
 from . import MODEL_NAME
-from app.socialMedia.routes import socialMedial_col
+from app.socialMedia.routes import socialMedia_col
 
 user_col:Collection = db.get_collection("userTB")
 router = APIRouter()
@@ -25,7 +25,7 @@ async def index(pageSize: int = 10, pageNumebr: int = 1,loginData = Depends(vali
         if "profile_file" in item:
             item['profile_file'] = get_S3_signed_URL(item['profile_file'])
         socialMediaList = list()
-        for socialMedia in socialMedial_col.find({"user_id":str(item["_id"])},{"_id":0,"name":0,"created_at":0,"user_id":0}):
+        for socialMedia in socialMedia_col.find({"user_id":str(item["_id"])},{"_id":0,"name":0,"created_at":0,"user_id":0}):
             socialMedia["logo_file"] = get_S3_signed_URL(socialMedia["logo_file"])
             socialMediaList.append(json.loads(json.dumps(socialMedia,default=str)))
         item["social_media_list"] = socialMediaList
@@ -44,7 +44,7 @@ async def get_User_ById(id:str,loginData = Depends(validateToken)):
             if "profile_file" in result:
                 result['profile_file'] = get_S3_signed_URL(result['profile_file'])
             socialMediaList = list()
-            for socialMedia in socialMedial_col.find({"user_id":str(result["_id"])},{"_id":0,"name":0,"created_at":0,"user_id":0}):
+            for socialMedia in socialMedia_col.find({"user_id":str(result["_id"])},{"_id":0,"name":0,"created_at":0,"user_id":0}):
                 socialMedia["logo_file"] = get_S3_signed_URL(socialMedia["logo_file"])
                 socialMediaList.append(json.loads(json.dumps(socialMedia,default=str)))
             result["social_media_list"] = socialMediaList
