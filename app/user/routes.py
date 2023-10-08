@@ -10,6 +10,8 @@ from app.user.models import UserCreateModel, UserUpdateModel
 from app.helper import get_S3_signed_URL, file_upload_s3, get_filename, delete_file_s3, get_hashed_password, get_token_data, validateToken
 from . import MODEL_NAME
 from app.socialMedia.routes import socialMedia_col
+from app.skill.routes import skill_col
+from app.projects.routes import project_col
 
 user_col:Collection = db.get_collection("userTB")
 router = APIRouter()
@@ -38,7 +40,6 @@ async def index(pageSize: int = 10, pageNumebr: int = 1,loginData = Depends(vali
 @router.get("/{id}")
 async def get_User_ById(id:str,loginData = Depends(validateToken)):
     try:
-        print(ObjectId(id))
         result = user_col.find_one({"_id": ObjectId(id)},{"hashedPassword":0,"created_at":0})
         if result is not None:
             if "profile_file" in result:
@@ -62,7 +63,11 @@ async def create_user(item: UserCreateModel = Depends(), profile_file: UploadFil
            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST,content="Email Already Exsist !") 
     except Exception as e:
         print("Error While Existing User check ---> ",e)
-    if item.technologies is not None: item.technologies = json.loads(item.technologies)
+    item.location = "";
+    if item.title is not None: item.title = json.loads(item.title)
+    if item.city is not None: item.location += item.city + ","
+    if item.country is not None: item.location += item.country
+
     item.hashedPassword = get_hashed_password(item.password)
     del item.password
     try:
@@ -94,7 +99,10 @@ async def update_user(loginData = Depends(validateToken),item:UserUpdateModel = 
 
             file_upload_s3(profile_file.file, unique_filename)
             item.profile_file = unique_filename
-
+        item.location = ""
+        if item.title is not None: item.title = json.loads(item.title)
+        if item.city is not None: item.location += item.city + ","
+        item.location += item.country or old_object["country"]
         user = {k: v for k, v in item.model_dump().items() if v is not None and str(v) != ''}
         if len(user) >= 1:
             update_result = user_col.update_one({"_id": ObjectId(old_object["_id"])}, {"$set": user})
@@ -120,3 +128,37 @@ async def delete_user(loginData = Depends(validateToken)):
     except Exception as e:
         print("Error while deleting user ---->",e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+
+@router.get("/web/{email}")
+async def get_user_data(email:str):
+    try:
+        result = user_col.find_one({"email": email},{"hashedPassword":0,"created_at":0})
+        if result is not None:
+            if "profile_file" in result:
+                result['profile_file'] = get_S3_signed_URL(result['profile_file'])
+
+            socialMediaList = list()
+            for socialMedia in socialMedia_col.find({"user_id":str(result["_id"])},{"_id":0,"created_at":0,"user_id":0}):
+                socialMedia["logo_file"] = get_S3_signed_URL(socialMedia["logo_file"])
+                socialMediaList.append(json.loads(json.dumps(socialMedia,default=str)))
+            result["social_media_list"] = socialMediaList
+
+            skillList = list()
+            for skill in skill_col.find({"user_id":str(result["_id"])},{"_id":0,"created_at":0,"user_id":0}):
+                skill["logo_file"] = get_S3_signed_URL(skill["logo_file"])
+                skillList.append(json.loads(json.dumps(skill,default=str)))
+            result["skill_list"] = skillList
+
+            projectList = list()
+            for project in project_col.find({"user_id":str(result["_id"])},{"_id":0,"created_at":0,"user_id":0}):
+                project["cover_file"] = get_S3_signed_URL(project["cover_file"])
+                projectList.append(json.loads(json.dumps(project,default=str)))
+            result["project_list"] = projectList
+
+            return json.loads(json.dumps(result,default=str))
+        return HTTPException(status_code=404, detail="User is not exist")
+    except Exception as e:
+        print(f"Error while fetching front data {email}--->",e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+        

@@ -43,6 +43,9 @@ def create_app():
     from app.certificate.routes import router as CertificateRouter
     app.include_router(CertificateRouter, tags=["Certificate"], prefix="/certificate")
 
+    from app.skill.routes import router as SkillRouter
+    app.include_router(SkillRouter, tags=["Skill"], prefix="/skill")
+
     @app.get("/test",tags=["Root"])
     async def read_root():
         return {"message": "Welcome!"}

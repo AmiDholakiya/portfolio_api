@@ -46,7 +46,7 @@ async def get_socialMedia_ById(id:str,login_data = Depends(validateToken)):
 @router.post("/",response_description="Add new Social Media")
 async def create_socialmedia(item: SocialMediaCreateModel = Depends(), file: UploadFile = File(...), login_data = Depends(validateToken)):
     try:
-        unique_filename = get_filename(MODEL_NAME,"logo_file",file.filename)
+        unique_filename = get_filename(MODEL_NAME + "/" + login_data["email"],"logo_file",file.filename)
         file_upload_s3(file.file, unique_filename)
         item.logo_file = unique_filename
         item.user_id = login_data["_id"]
@@ -67,7 +67,7 @@ async def update_socialMedia(id:str, item:SocialMediaUpdateModel = Depends(), fi
             return HTTPException(status_code=404, detail="Social Media is not exist")
         if file is not None:
             delete_file_s3(old_object["logo_file"])
-            unique_filename = get_filename(MODEL_NAME,"logo_file",file.filename)
+            unique_filename = get_filename(MODEL_NAME + "/" + login_data["email"],"logo_file",file.filename)
             file_upload_s3(file.file, unique_filename)
             item.logo_file = unique_filename
 
