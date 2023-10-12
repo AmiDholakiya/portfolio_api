@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import boto3
 import os
 from jwt.api_jwt import PyJWT
@@ -9,6 +10,13 @@ from pymongo.mongo_client import MongoClient
 def create_app():
     global app, db, s3, jwt_obj
     app = FastAPI()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     load_dotenv()
     cluster=MongoClient(os.getenv('MONGODB_URI'))
     try:

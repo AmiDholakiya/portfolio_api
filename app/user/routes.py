@@ -139,19 +139,19 @@ async def get_user_data(email:str):
                 result['profile_file'] = get_S3_signed_URL(result['profile_file'])
 
             socialMediaList = list()
-            for socialMedia in socialMedia_col.find({"user_id":str(result["_id"])},{"_id":0,"created_at":0,"user_id":0}):
+            for socialMedia in socialMedia_col.find({"user_id":str(result["_id"])},{"created_at":0,"user_id":0}):
                 socialMedia["logo_file"] = get_S3_signed_URL(socialMedia["logo_file"])
                 socialMediaList.append(json.loads(json.dumps(socialMedia,default=str)))
             result["social_media_list"] = socialMediaList
 
             skillList = list()
-            for skill in skill_col.find({"user_id":str(result["_id"])},{"_id":0,"created_at":0,"user_id":0}):
+            for skill in skill_col.find({"user_id":str(result["_id"])},{"created_at":0,"user_id":0}):
                 skill["logo_file"] = get_S3_signed_URL(skill["logo_file"])
                 skillList.append(json.loads(json.dumps(skill,default=str)))
             result["skill_list"] = skillList
 
             projectList = list()
-            for project in project_col.find({"user_id":str(result["_id"])},{"_id":0,"created_at":0,"user_id":0}):
+            for project in project_col.find({"user_id":str(result["_id"])},{"created_at":0,"user_id":0}):
                 project["cover_file"] = get_S3_signed_URL(project["cover_file"])
                 projectList.append(json.loads(json.dumps(project,default=str)))
             result["project_list"] = projectList
