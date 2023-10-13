@@ -43,8 +43,7 @@ def get_S3_signed_URL(object_key:str, expiry=3600):
 
 def file_upload_s3(file:bytes,filename, fileType):
     try:
-        if(fileType): s3.upload_fileobj(file, os.environ["S3_BUCKET"], filename, ExtraArgs={'ContentType': fileType})
-        else: s3.upload_fileobj(file, os.environ["S3_BUCKET"], filename)
+        s3.upload_fileobj(file, os.environ["S3_BUCKET"], filename, ExtraArgs={'ContentType': fileType})
     except Exception as e:
         print(f"Error While uploading file in S3 Bucket ----->",e)
         raise HTTPException(status_code=500, detail="Internal Server Error")

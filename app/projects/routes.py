@@ -46,7 +46,7 @@ async def get_project_ById(id:str,login_data = Depends(validateToken)):
 async def create_project(item: ProjectsCreateModel = Depends(), file: UploadFile = File(...), login_data = Depends(validateToken)):
     try:
         unique_filename = get_filename(MODEL_NAME + "/" + login_data["email"],"cover_file",file.filename)
-        file_upload_s3(file.file, unique_filename)
+        file_upload_s3(file.file, unique_filename,file.content_type)
         item.cover_file = unique_filename
         item.user_id = login_data["_id"]
         if item.technologies is not None: item.technologies = json.loads(item.technologies)
@@ -69,7 +69,7 @@ async def update_project(id:str, item:ProjectsUpdateModel = Depends(), file: Upl
         if file is not None:
             delete_file_s3(old_object["cover_file"])
             unique_filename = get_filename(MODEL_NAME + "/" + login_data["email"],"cover_file",file.filename)
-            file_upload_s3(file.file, unique_filename)
+            file_upload_s3(file.file, unique_filename,file.content_type)
             item.cover_file = unique_filename
         
         if item.technologies is not None:

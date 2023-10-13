@@ -68,7 +68,7 @@ async def update_skill(id:str, item:SkillUpdateModel = Depends(), file: UploadFi
         if file is not None:
             delete_file_s3(old_object["logo_file"])
             unique_filename = get_filename(MODEL_NAME + "/" + login_data["email"],"logo_file",file.filename)
-            file_upload_s3(file.file, unique_filename)
+            file_upload_s3(file.file, unique_filename,file.content_type)
             item.logo_file = unique_filename
 
         skill = {k: v for k, v in item.model_dump().items() if v is not None and str(v) != ''}

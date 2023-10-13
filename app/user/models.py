@@ -18,6 +18,7 @@ class UserBaseModel(BaseModel):
     profile_file: str | None = None
     resume_link: str | None = None
     location: str | None = None
+    background_file: str | None = None
     class Config:
         population_by_name = True
         arbitrary_types_allowed = True
@@ -41,6 +42,7 @@ class UserCreateModel(BaseModel):
     city: str | None = None
     country: str | None = None
     location: str | None = None
+    background_file: str | None = None
     resume_link: str | None = None
     created_at: datetime.datetime = datetime.datetime.now()
     password: str = Field(..., min_length=5, max_length=24, description="user password")
@@ -58,6 +60,7 @@ class UserUpdateModel(BaseModel):
     city: str | None = None
     country: str | None = None
     location: str | None = None
+    background_file: str | None = None
 
 
 class UserDBModel(UserBaseModel):

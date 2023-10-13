@@ -23,12 +23,14 @@ async def index(pageSize: int = 10, pageNumebr: int = 1,loginData = Depends(vali
     resultList = list()
     total_document = user_col.count_documents({})
     get_all = user_col.find({},{"hashedPassword":0,"created_at":0}).skip(skip).limit(pageSize).sort("created_at",1)
+    
     for item in get_all:
         if "profile_file" in item:
             item['profile_file'] = get_S3_signed_URL(item['profile_file'])
+        if "background_file" in item:
+            item['background_file'] = get_S3_signed_URL(item['background_file'])
         socialMediaList = list()
-        for socialMedia in socialMedia_col.find({"user_id":str(item["_id"])},{"_id":0,"name":0,"created_at":0,"user_id":0}):
-            socialMedia["logo_file"] = get_S3_signed_URL(socialMedia["logo_file"])
+        for socialMedia in socialMedia_col.find({"user_id":str(item["_id"])},{"created_at":0,"user_id":0}):
             socialMediaList.append(json.loads(json.dumps(socialMedia,default=str)))
         item["social_media_list"] = socialMediaList
         resultList.append(json.loads(json.dumps(item,default=str)))
@@ -44,6 +46,8 @@ async def get_User_ById(id:str,loginData = Depends(validateToken)):
         if result is not None:
             if "profile_file" in result:
                 result['profile_file'] = get_S3_signed_URL(result['profile_file'])
+            if "background_file" in result:
+                result["background_file"] = get_S3_signed_URL(result["background_file"])
             socialMediaList = list()
             for socialMedia in socialMedia_col.find({"user_id":str(result["_id"])},{"_id":0,"name":0,"created_at":0,"user_id":0}):
                 socialMedia["logo_file"] = get_S3_signed_URL(socialMedia["logo_file"])
@@ -56,14 +60,14 @@ async def get_User_ById(id:str,loginData = Depends(validateToken)):
         raise HTTPException(status_code=500, detail="Internal Server Error")
  
 @router.post("/",response_description="Add new User")
-async def create_user(item: UserCreateModel = Depends(), profile_file: UploadFile = File(...),loginData = Depends(validateToken) ):
+async def create_user(item: UserCreateModel = Depends(), profile_file: UploadFile = File(...), background_file: UploadFile = File(...),loginData = Depends(validateToken) ):
     try:
         existing_user = user_col.find_one({"email":item.email})
         if existing_user is not None:
            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST,content="Email Already Exsist !") 
     except Exception as e:
         print("Error While Existing User check ---> ",e)
-    item.location = "";
+    item.location = ""
     if item.title is not None: item.title = json.loads(item.title)
     if item.city is not None: item.location += item.city + ","
     if item.country is not None: item.location += item.country
@@ -73,13 +77,20 @@ async def create_user(item: UserCreateModel = Depends(), profile_file: UploadFil
     try:
         if profile_file is not None:
             unique_filename = get_filename(MODEL_NAME,f'{item.email}',profile_file.filename)
-            file_upload_s3(profile_file.file, unique_filename)
+            file_upload_s3(profile_file.file, unique_filename,profile_file.content_type)
             item.profile_file = unique_filename
+
+        if background_file is not None:
+            background_filename = get_filename(MODEL_NAME,f'{item.email}',background_file.filename)
+            file_upload_s3(background_file.file, background_filename,background_file.content_type)
+            item.background_file = background_filename
         user = {k: v for k, v in item.model_dump().items() if v is not None and str(v) != ''}
         # user = jsonable_encoder(item)
         user_col.insert_one(user)
         resultObj = json.loads(json.dumps(user,default=str))
         resultObj["profile_file"] = get_S3_signed_URL(resultObj["profile_file"])
+        resultObj["background_file"] = get_S3_signed_URL(resultObj["background_file"])
+
         del resultObj["hashedPassword"]
         return JSONResponse(status_code=status.HTTP_200_OK,content=resultObj)
     except Exception as error:
@@ -87,7 +98,7 @@ async def create_user(item: UserCreateModel = Depends(), profile_file: UploadFil
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 @router.put("/")
-async def update_user(loginData = Depends(validateToken),item:UserUpdateModel = Depends(), profile_file: UploadFile = File(None) ):
+async def update_user(loginData = Depends(validateToken),item:UserUpdateModel = Depends(), profile_file: UploadFile = File(None), background_file: UploadFile = File(None) ):
     try :
         old_object = user_col.find_one({"email":loginData["email"]})
         if old_object is None:
@@ -96,9 +107,13 @@ async def update_user(loginData = Depends(validateToken),item:UserUpdateModel = 
             delete_file_s3(old_object["profile_file"])
             # unique_filename = get_filename(MODEL_NAME,f'{item.email if item.email is not None else old_object["email"]}',profile_file.filename)
             unique_filename = get_filename(MODEL_NAME,f'{item.email or old_object["email"]}',profile_file.filename)
-
-            file_upload_s3(profile_file.file, unique_filename)
+            file_upload_s3(profile_file.file, unique_filename,profile_file.content_type)
             item.profile_file = unique_filename
+        if background_file is not None:
+            delete_file_s3(old_object["background_file"])
+            background_filename = get_filename(MODEL_NAME,f'{item.email or old_object["email"]}',background_file.filename)
+            file_upload_s3(background_file.file, background_filename,background_file.content_type)
+            item.background_file = background_filename
         item.location = ""
         if item.title is not None: item.title = json.loads(item.title)
         if item.city is not None: item.location += item.city + ","
@@ -122,6 +137,7 @@ async def delete_user(loginData = Depends(validateToken)):
 
         if delete_result is not None:
             delete_file_s3(delete_result["profile_file"])
+            delete_file_s3(delete_result["background_file"])
             return {"message":"User Deleted"}
 
         return HTTPException(status_code=404, detail="User is not exist")
@@ -137,10 +153,10 @@ async def get_user_data(email:str):
         if result is not None:
             if "profile_file" in result:
                 result['profile_file'] = get_S3_signed_URL(result['profile_file'])
-
+            if "background_file" in result:
+                result["background_file"] = get_S3_signed_URL(result['background_file'])
             socialMediaList = list()
             for socialMedia in socialMedia_col.find({"user_id":str(result["_id"])},{"created_at":0,"user_id":0}):
-                socialMedia["logo_file"] = get_S3_signed_URL(socialMedia["logo_file"])
                 socialMediaList.append(json.loads(json.dumps(socialMedia,default=str)))
             result["social_media_list"] = socialMediaList
 

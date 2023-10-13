@@ -47,7 +47,7 @@ async def get_certificates_ById(id:str,login_data = Depends(validateToken)):
 async def create_socialmedia(item: CertificateCreateModel = Depends(), file: UploadFile = File(...), login_data = Depends(validateToken)):
     try:
         unique_filename = get_filename(MODEL_NAME + "/"+login_data["email"],"icon_file",file.filename)
-        file_upload_s3(file.file, unique_filename)
+        file_upload_s3(file.file, unique_filename, file.content_type)
         item.icon_file = unique_filename
         item.user_id = login_data["_id"]
         certificates = jsonable_encoder(item)
@@ -68,7 +68,7 @@ async def update_certificates(id:str, item:CertificateUpdateModel = Depends(), f
         if file is not None:
             delete_file_s3(old_object["icon_file"])
             unique_filename = get_filename(MODEL_NAME + "/"+login_data["email"],"icon_file",file.filename)
-            file_upload_s3(file.file, unique_filename)
+            file_upload_s3(file.file, unique_filename,file.content_type)
             item.icon_file = unique_filename
 
         certificates = {k: v for k, v in item.model_dump().items() if v is not None and str(v) != ''}
