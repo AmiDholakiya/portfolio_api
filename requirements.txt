@@ -1,4 +1,19 @@
-Flask
-Flask-OIDC
-Flask_cors
+# Flask
+# Flask-OIDC
+# Flask_cors
+# pymongo>3
+# python-dotenv
+# Flask-Pydantic
+# pydantic
+#motor
+
+fastapi
+uvicorn
 pymongo>3
+Pydantic
+boto3
+python-multipart
+# python-jose[cryptography]
+passlib[bcrypt]
+python-dotenv
+PyJWT

@@ -5,29 +5,18 @@ from bson import ObjectId
 import datetime
 from app.helper import PyObjectId
 
-class ProjectsDBModel(BaseModel):
+class CertificateDBModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId,alias="_id")
     title: str
-    project_type_id: str
-    cover_file: str
-    project_link: str
-    technologies: list[str]
-    description: str
-    source_code_link: str
-    tag: str
+    icon_file: str
+    link: str
     user_id:str 
     created_at: str
-
-class ProjectsCreateModel(BaseModel):
+class CertificateCreateModel(BaseModel):
     # id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     title: str
-    project_type_id: str
-    cover_file: str | None = None
-    project_link: str | None = None
-    technologies: str
-    description: str
-    source_code_link: str | None = None
-    tag: str | None = None
+    icon_file: str | None = None
+    link: str 
     user_id: str | None = None
     created_at: datetime.datetime = datetime.datetime.now()
     def to_json(self):
@@ -44,21 +33,15 @@ class ProjectsCreateModel(BaseModel):
         json_encoders = {ObjectId: str}
         json_schema_extra = {
             "example": {
-                "title": "facebook",
-                "cover_file":"textfile.txt"
+                "title": "vnsgu",
+                "icon_file":"master"
             }
         }
 
-class ProjectsUpdateModel(BaseModel):
-    # id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+class CertificateUpdateModel(BaseModel):
     title: Optional[str] = Field(default="")
-    project_type_id: Optional[str] = Field(default="")
-    project_link: Optional[str] = Field(default="")
-    technologies: Optional[str] = Field(default=None)
-    description: Optional[str] = Field(default="")
-    source_code_link: Optional[str] = Field(default="")
-    tag: Optional[str] = Field(default="")
-    cover_file: Optional[str] = Field(default="")
+    link: Optional[str] = Field(default="")
+    icon_file: Optional[str] = Field(default="")
     def to_json(self):
         return jsonable_encoder(self,exclude_none=True)
         
@@ -73,7 +56,7 @@ class ProjectsUpdateModel(BaseModel):
         json_encoders = {ObjectId: str}
         json_schema_extra = {
             "example": {
-                "title": "facebook",
-                "cover_file":"textfile.txt"
+                "title": "vnsgu",
+                "icon_file":"master"
             }
         }
