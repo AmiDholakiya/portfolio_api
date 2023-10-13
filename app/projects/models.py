@@ -8,7 +8,7 @@ from app.helper import PyObjectId
 class ProjectsDBModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId,alias="_id")
     title: str
-    project_type_id: str
+    project_type: str
     cover_file: str
     project_link: str
     technologies: list[str]
@@ -21,7 +21,7 @@ class ProjectsDBModel(BaseModel):
 class ProjectsCreateModel(BaseModel):
     # id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     title: str
-    project_type_id: str
+    project_type: str
     cover_file: str | None = None
     project_link: str | None = None
     technologies: str
@@ -52,7 +52,7 @@ class ProjectsCreateModel(BaseModel):
 class ProjectsUpdateModel(BaseModel):
     # id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     title: Optional[str] = Field(default="")
-    project_type_id: Optional[str] = Field(default="")
+    project_type: Optional[str] = Field(default="")
     project_link: Optional[str] = Field(default="")
     technologies: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default="")
