@@ -9,9 +9,7 @@ from pymongo.mongo_client import MongoClient
 
 def create_app():
     global app, db, s3, jwt_obj
-    app = FastAPI(
-        openapi_prefix="/prod"
-    )
+    app = FastAPI(openapi_prefix="/prod")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
